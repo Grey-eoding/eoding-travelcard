@@ -1,0 +1,183 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>나에게 맞는 트래블 카드 찾기 ✈️</title>
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f0f6ff;
+            margin: 0;
+            padding: 2rem;
+            color: #333;
+        }
+        .container {
+            max-width: 720px;
+            margin: auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 0 16px rgba(0,0,0,0.1);
+            padding: 2.5rem;
+        }
+        h1 {
+            color: #1948ff;
+            text-align: center;
+        }
+        p {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #1948ff;
+            font-weight: bold;
+        }
+        .question {
+            margin-bottom: 2rem;
+        }
+        .options button {
+            display: block;
+            width: 100%;
+            padding: 0.9rem;
+            margin-bottom: 0.7rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            background-color: #e6f0ff;
+            cursor: pointer;
+        }
+        .options button:hover {
+            background-color: #d0e2ff;
+        }
+        .result-card {
+            background: #e6f0ff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+        }
+        .result-card h2 {
+            margin-top: 0;
+            color: #1948ff;
+        }
+        .result-card p {
+            text-align: left;
+            font-size: 1rem;
+            color: #333;
+        }
+        .footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <h1>나에게 맞는 트래블 카드 찾기 ✈️</h1>
+    <p>여행사 업무의 AtoZ – 어딩에서 만들었어요 💙</p>
+    <div id="quiz"></div>
+</div>
+
+<script>
+    const questions = [
+        {
+            q: "1. 어떤 여행 스타일이 더 끌리나요?",
+            a: ["편하게 교통/편의점/카페에서 할인받기", "수수료 아끼며 결제하고 싶음", "무제한 캐시백이 더 좋음"]
+        },
+        {
+            q: "2. 여행 자주 가는 지역은?",
+            a: ["일본/미국 등 특정국", "아시아/유럽 다양하게", "모두 다양하게"]
+        },
+        {
+            q: "3. 외화 충전 방식 선호는?",
+            a: ["자동 충전", "수동 충전", "체크카드처럼 쓰는 게 좋아"]
+        },
+        {
+            q: "4. 전월실적 있어도 괜찮나요?",
+            a: ["신경 쓰기 싫음", "20~30만원 정도는 가능", "상관없음"]
+        },
+        {
+            q: "5. ATM 현금 인출 계획은?",
+            a: ["많이 씀", "거의 안 씀", "가끔 씀"]
+        },
+        {
+            q: "6. 여행 중 가장 중요한 건?",
+            a: ["수수료 절약", "결제 편의성", "혜택과 리워드"]
+        },
+        {
+            q: "7. 선호하는 카드 스타일은?",
+            a: ["간편한 선불형", "전통 체크카드", "신용카드 느낌의 디자인"]
+        },
+        {
+            q: "8. 추가 혜택 중 더 끌리는 건?",
+            a: ["환율 우대", "교통카드 기능", "카페/편의점 할인"]
+        }
+    ];
+
+    const results = {
+        "A": {
+            name: "트레블 월렛",
+            desc: `<strong>✈️ 트레블 월렛 추천!</strong><br>현지 결제 수수료를 아끼고 싶은 여행자에게<br>
+            💡 미국, 일본, 유럽 통화 수수료 0%<br>
+            💡 외화 예산 관리 쉬움, 연회비/실적 없음`
+        },
+        "B": {
+            name: "하나 트레블로그 체크카드",
+            desc: `<strong>🌍 하나 트레블로그 체크카드 추천!</strong><br>아시아/유럽 여행 많은 분께 좋아요<br>
+            💡 58개국 환전 수수료 무료<br>
+            💡 교통카드처럼 쓸 수 있어요`
+        },
+        "C": {
+            name: "하나 트래블GO 체크카드",
+            desc: `<strong>🧳 하나 트래블GO 체크카드 추천!</strong><br>혜택 챙기고 싶은 알뜰 여행자에게<br>
+            💡 실적 20만 원 이상 시 환전 수수료 혜택<br>
+            💡 일부 ATM은 별도 수수료 발생`
+        }
+    };
+
+    let current = 0;
+    let answers = [];
+
+    function renderQuestion() {
+        const q = questions[current];
+        const container = document.getElementById('quiz');
+        container.innerHTML = `
+            <div class="question">
+                <h3>${q.q}</h3>
+                <div class="options">
+                    ${q.a.map((text, i) => `<button onclick="choose(${i})">${text}</button>`).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    function choose(index) {
+        answers.push(index);
+        current++;
+        if (current < questions.length) {
+            renderQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        let key;
+        if (answers[0] === 1 && answers[1] === 0) key = "A";
+        else if (answers[0] === 0 && answers[1] === 1) key = "B";
+        else if (answers[0] === 0 && answers[3] === 1) key = "C";
+        else key = "A";
+
+        const card = results[key];
+        document.getElementById('app').innerHTML = `
+            <div class="result-card">
+                <h2>추천 카드: ${card.name}</h2>
+                <p>${card.desc}</p>
+            </div>
+            <div class="footer">여행사 업무의 AtoZ, 어딩이 함께합니다 💙</div>
+        `;
+    }
+
+    renderQuestion();
+</script>
+</body>
+</html>
